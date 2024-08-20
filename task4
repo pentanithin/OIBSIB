@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do Web App</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Eo_circle_light-blue_checkmark.svg/2048px-Eo_circle_light-blue_checkmark.svg.png">
+    <style>
+        body{
+            background-color: whitesmoke;
+        }
+        #heading{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            color: #6495ED;
+            gap: 10px;
+            margin-top: 100px;
+            margin-bottom: 40px;
+
+        }
+        #todo_img{
+            width:70px;
+            height: 70px;
+        }
+        #add_bar{
+            display: flex;
+            width: 80%;
+            margin: 0 auto;
+            justify-content: space-between;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #todo_btn{
+            width: 7%;
+            color: white;
+            background-color: #6495ED;
+            font-size: large;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+           
+        }
+        #display{
+            margin-top: 80px;
+        }
+        #input_todo{
+            color: #6495ED;
+        }
+        #completed{
+            background-color:#6495ED;
+            border: none;
+            font-size: larger;
+            border-radius: 5px;
+            margin:30px;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+        }
+        #done_list{
+            display: none;
+            width: 100%;
+
+        }
+    
+    </style>
+</head>
+<body>
+    <button id="completed" onclick="completed()">Completed Tasks</button>
+    <div id="heading">
+        <img id="todo_img" src="https://parspng.com/wp-content/uploads/2022/07/tickpng.parspng.com-5-300x300.png">
+        <h1 id="main_head">My_To-Do</h1>
+    </div>
+    <div id="add_bar">
+        <input id="input_todo" type="text" placeholder="Add new..." style="width: 70%;height: 30px; border: none;outline: none;"onkeydown="onpress(event)">
+        <button id="todo_btn" onclick="add_todo()" >Add</button>
+    </div>
+    <div id="display">
+
+    </div>
+    <div id="done_list">
+
+    </div>
+    <script>
+        display();
+        var details=JSON.parse(localStorage.getItem('data'))||[];
+        var complete=JSON.parse(localStorage.getItem('completed'))||[];
+        function add_todo(){
+            var input_val=document.getElementById('input_todo').value.trim();
+            if(input_val==""){
+                alert('Enter your To_Do task');
+                return
+            }
+            var input=document.getElementById('input_todo').value;
+            var date=new Date()
+            var months=["January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"];
+            var day=date.getDate();
+            var month=months[date.getMonth()]
+            var year=date.getFullYear();
+            var full_date= day+" "+month+" "+year;
+            var obj={
+                task:input,
+                date:full_date
+            }
+            var details=JSON.parse(localStorage.getItem('data'))||[];
+            details.push(obj);
+            localStorage.setItem('data',JSON.stringify(details));
+            document.getElementById('input_todo').value="";
+            display();
+            
+        }
+        function display(){
+            var details=JSON.parse(localStorage.getItem('data'))||[];
+            document.getElementById('display').innerHTML="";
+            details.forEach(function(ele,index){
+                var task=document.createElement('div');
+                task.classList.add('task_div');
+                task.setAttribute('id',index);
+                task.style.display="flex";
+                task.style.alignItems="center";
+                task.style.gap="30px";
+                task.style.marginLeft="auto";
+                task.style.marginRight="auto";
+                task.style.marginBottom="20px"
+                task.style.width="80%";
+                task.style.borderRadius="5px";
+                task.style.backgroundColor="white";
+                task.style.padding="10px"
+                var box=document.createElement('input');
+                box.type="checkbox";
+                box.setAttribute('id',index);
+                box.addEventListener('change',function(){
+                    deleting(index);
+                });
+
+                box.style.width="40px";
+                box.style.height="20px";
+                var title=document.createElement('h3');
+                title.innerHTML=ele.task;
+                title.style.color="#6495ED";     
+                var when=document.createElement('h4');
+                task.style.position="relative";
+                when.innerHTML=ele.date;
+                when.style.position="absolute";
+                when.style.right="25px"
+                when.style.color="#6495ED"
+
+                task.append(box);
+                task.append(title);
+                task.append(when);
+                document.getElementById('display').append(task);
+            });
+        }
+        function onpress(event){
+            console.log('in');
+            if(event.key=='Enter'){
+                add_todo();
+            }
+        }
+        function deleting(val){
+            console.log(val);
+            var details=JSON.parse(localStorage.getItem('data'))||[]
+            var complete=JSON.parse(localStorage.getItem('completed'))||[];
+            var date=new Date()
+            var months=["January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"];
+            var day=date.getDate();
+            var month=months[date.getMonth()]
+            var year=date.getFullYear();
+            var full_date= day+" "+month+" "+year;
+            details[val].date=full_date;
+            var complete=JSON.parse(localStorage.getItem('completed'))||[];
+            complete.push(details[val]);
+            localStorage.setItem('completed',JSON.stringify(complete));
+            if (val >= 0 && val < details.length) {
+                details.splice(val, 1);
+            }
+            localStorage.setItem('data',JSON.stringify(details));
+            display();
+            
+        }
+        function completed(){
+            var complete=JSON.parse(localStorage.getItem('completed'))||[];
+            document.getElementById('done_list').innerHTML = "";
+            if(complete.length==0){
+                alert("No Completed Tasks");
+                
+            }
+            var btn=document.createElement('button');
+            btn.innerHTML="Back";
+            btn.style.backgroundColor="#6495ED";
+            btn.style.border="none";
+            btn.style.color="white";
+            btn.style.padding="10px";
+            btn.style.margin="30px";
+            btn.style.cursor="pointer";
+            btn.style.borderRadius="5px";
+            btn.addEventListener('click',function(){
+                go_back();
+            });
+            document.getElementById('done_list').append(btn);
+            complete.forEach(function(ele,index){
+                var task=document.createElement('div');
+                task.classList.add('task_div');
+                task.setAttribute('id',index);
+                task.style.display="flex";
+                task.style.alignItems="center";
+                task.style.gap="30px";
+                task.style.marginLeft="auto";
+                task.style.marginRight="auto";
+                task.style.marginBottom="20px"
+                task.style.width="80%";
+                task.style.borderRadius="5px";
+                task.style.backgroundColor="white";
+                task.style.padding="10px"
+                var box=document.createElement('input');
+                box.type="checkbox";
+                box.setAttribute('id',index);
+                box.addEventListener('change',function(){
+                    cmplt_del(index);
+                });
+
+                box.style.width="40px";
+                box.style.height="20px";
+                var title=document.createElement('h3');
+                title.innerHTML=ele.task;
+                title.style.color="#6495ED";     
+                var when=document.createElement('h4');
+                task.style.position="relative";
+                when.innerHTML=ele.date;
+                when.style.position="absolute";
+                when.style.right="25px"
+                when.style.color="#6495ED"
+
+                task.append(box);
+                task.append(title);
+                task.append(when);
+                document.getElementById('heading').style.display="none";
+                document.getElementById('add_bar').style.display="none";
+                document.getElementById('display').style.display="none";
+                document.getElementById('completed').style.display="none";
+                document.getElementById('done_list').style.display="block";
+                
+                document.getElementById('done_list').append(task);
+            });
+            
+        }
+        function cmplt_del(val){
+            var complete=JSON.parse(localStorage.getItem('completed'))||[];
+            complete.splice(val,1);
+            localStorage.setItem('completed',JSON.stringify(complete));
+            completed();
+        }
+        function go_back() {
+            document.getElementById('heading').style.display = "flex";
+            document.getElementById('add_bar').style.display = "flex";
+            document.getElementById('display').style.display = "block";
+            document.getElementById('completed').style.display = "inline-block";
+            document.getElementById('done_list').style.display = "none";
+            document.getElementById('done_list').innerHTML = "";
+        
+            // Refresh the display of active tasks
+            display();
+        }
+
+        
+    </script>
+</body>
+</html>
